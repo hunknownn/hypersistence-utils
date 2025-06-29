@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import org.junit.Test;
 
 import java.util.function.Supplier;
+import static org.junit.Assert.assertNotNull;
 
 public class TsidIdentifierTest extends AbstractTest {
 
@@ -15,7 +16,8 @@ public class TsidIdentifierTest extends AbstractTest {
     protected Class<?>[] entities() {
         return new Class<?>[] {
             Post.class,
-            Tag.class
+            Tag.class,
+            Log.class
         };
     }
 
@@ -31,6 +33,23 @@ public class TsidIdentifierTest extends AbstractTest {
                 new Post()
                     .setTitle("High-Performance Java Persistence")
             );
+        });
+    }
+
+    @Test
+    public void normalFieldTsidGeneration() {
+        doInJPA(entityManager -> {
+            Log log = new Log();
+            entityManager.persist(log);
+            entityManager.flush();
+            entityManager.clear();
+
+            Log persisted = entityManager.find(Log.class, log.getId());
+
+            assertNotNull(persisted.getTimestamp(), "timestamp should not be null");
+
+            TSID parsedTsid = TSID.from(persisted.getTimestamp());
+            assertNotNull(parsedTsid.getInstant().toString(), "timestamp should be valid TSID string");
         });
     }
 
@@ -87,6 +106,36 @@ public class TsidIdentifierTest extends AbstractTest {
 
         public Tag setName(String name) {
             this.name = name;
+            return this;
+        }
+    }
+
+    @Entity(name = "Log")
+    @Table(name = "log")
+    public static class Log {
+
+        @Id
+        @Tsid
+        private Long id;
+
+        @Tsid
+        private String timestamp;
+
+        public Long getId() {
+            return id;
+        }
+
+        public Log setId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public String getTimestamp() {
+            return timestamp;
+        }
+
+        public Log setTimestamp(String timestamp) {
+            this.timestamp = timestamp;
             return this;
         }
     }

@@ -2,6 +2,7 @@ package io.hypersistence.utils.hibernate.id;
 
 import io.hypersistence.tsid.TSID;
 import org.hibernate.annotations.IdGeneratorType;
+import org.hibernate.annotations.ValueGenerationType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,6 +23,7 @@ import static java.lang.annotation.ElementType.METHOD;
  * @author Vlad Mihalcea
  */
 @IdGeneratorType(TsidGenerator.class)
+@ValueGenerationType(generatedBy = TsidFieldGenerator.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({FIELD, METHOD})
 public @interface Tsid {
